@@ -1,0 +1,6 @@
+#define FLITE_PROJECT_NAME "Festival Lite for Italian"
+#define FLITE_PROJECT_PREFIX "it_flite"
+#define FLITE_PROJECT_VERSION "0.75"
+#define FLITE_PROJECT_DATE "October 2004"
+#define FLITE_PROJECT_STATE "release"
+#define FLITE_PROJECT_SHLIB_VERSION "1"
