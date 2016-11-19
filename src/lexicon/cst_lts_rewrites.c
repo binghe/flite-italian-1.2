@@ -41,6 +41,11 @@
 /*                                                                       */
 /*************************************************************************/
 
+/*************************************************************************/
+/*      Modified by:  Fabio Tesser <tesser@pd.istc.cnr.it>               */
+/*             Date:  October 2004                                       */
+/*************************************************************************/
+
 #include <stdio.h>
 #include <string.h>
 #include "cst_string.h"
@@ -85,14 +90,14 @@ static int context_match(const cst_val *PATTERN, const cst_val *STRING,
 	    context_match(val_cdr(val_cdr(PATTERN)),STRING,sets) || /* skip */
 	    context_match(val_cdr(PATTERN),STRING,sets) || /* last match */
 	    (item_match(val_car(val_cdr(PATTERN)),val_car(STRING),sets) && 
-	     context_match(val_cdr(val_cdr(PATTERN)),   /* loop match */
+	     context_match(PATTERN,   /* loop match */
 			   val_cdr(STRING),sets));
 #if 0
     else if (val_cdr(PATTERN) &&
 	     (cst_streq("+",val_string(val_car(PATTERN)))))
 	return context_match(val_cdr(PATTERN),STRING,sets) || /* last match */
 	    (item_match(val_car(val_cdr(PATTERN)),val_car(STRING),sets) &&
-	    context_match(val_cdr(val_cdr(PATTERN)),  /* loop match */
+	    context_match(PATTERN,  /* loop match */
 			  val_cdr(STRING),sets));
 #endif
     else if (item_match(val_car(PATTERN),val_car(STRING),sets))

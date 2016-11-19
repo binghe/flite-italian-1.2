@@ -38,6 +38,11 @@
 /*                                                                       */
 /*************************************************************************/
 
+/*************************************************************************/
+/*      Modified by:  Fabio Tesser <tesser@pd.istc.cnr.it>               */
+/*             Date:  October 2004                                       */
+/*************************************************************************/
+
 #include <stdio.h>
 #include <string.h>
 #include "cst_hrg.h"
@@ -72,6 +77,7 @@ const cst_synth_module synth_method_text[] = {
     { "postlex_func", NULL },
     { "duration_model_func", cart_duration },
     { "f0_model_func", NULL },
+    { "diphones_map_func", NULL },
     { "wave_synth_func", NULL },
     { NULL, NULL }
 };
@@ -86,6 +92,7 @@ const cst_synth_module synth_method_tokens[] = {
     { "postlex_func", NULL },
     { "duration_model_func", cart_duration },
     { "f0_model_func", NULL },
+    { "diphones_map_func", NULL },
     { "wave_synth_func", NULL },
     { NULL, NULL }
 };
@@ -95,6 +102,7 @@ const cst_synth_module synth_method_phones[] = {
     { "intonation_func", NULL },
     { "duration_model_func", cart_duration },
     { "f0_model_func", flat_prosody },
+    { "diphones_map_func", NULL },
     { "wave_synth_func", NULL },
     { NULL, NULL }
 };
@@ -127,12 +135,11 @@ cst_utterance *apply_synth_method(cst_utterance *u,
 
 cst_utterance *utt_init(cst_utterance *u, cst_voice *vox)
 {
-    feat_copy_into(vox->features,u->features);
-    feat_copy_into(vox->ffunctions,u->ffunctions);
-    if (vox->utt_init)
-	vox->utt_init(u, vox);
-
-    return u;
+  feat_copy_into(vox->features,u->features);
+  feat_copy_into(vox->ffunctions,u->ffunctions);
+  if (vox->utt_init)
+    vox->utt_init(u, vox);
+  return u;
 }
 
 cst_utterance *utt_synth(cst_utterance *u)
@@ -169,7 +176,7 @@ cst_utterance *default_tokenization(cst_utterance *u)
 	get_param_string(u->features,"text_prepunctuation",
 			 fd->prepunctuationsymbols);
     fd->postpunctuationsymbols = 
-	get_param_string(u->features,"text_pospunctuation",
+	get_param_string(u->features,"text_postpunctuation",
 			 fd->postpunctuationsymbols);
     
     while(!ts_eof(fd))
@@ -350,6 +357,41 @@ cst_utterance *cart_duration(cst_utterance *u)
     dur_tree = val_cart(feat_val(u->features,"dur_cart"));
     dur_stretch = get_param_float(u->features,"duration_stretch", 1.0);
     ds = val_dur_stats(feat_val(u->features,"dur_stats"));
+
+    //fabio:modificato per permettere il salvattaggio di un file con
+    //la durata dei fonemi.
+    int lab_file=0;
+    int tags=0;
+    int word_number;
+    char *lab_filename;
+    char *tags_position;
+    char * pch;
+    cst_val *p;
+    FILE *fout;
+    if (feat_present(u->features,"lab_filename")){
+      lab_file=1;
+      lab_filename=get_param_string(u->features,"lab_filename","out.lab");
+      fout=fopen(lab_filename,"wb");
+      if (!fout)
+	{
+	  fprintf(stderr,"\nCan't open IO files\n");
+	  return -1;
+	}
+      
+      if (feat_present(u->features,"tags_position")){
+	tags=1;
+	tags_position=get_param_string(u->features,"tags_position","");
+	p=NULL;
+	pch = strtok (tags_position," ");
+	while (pch != NULL)
+	  {
+	    p = cons_val(string_val(pch),p);
+	    pch = strtok (NULL, " ");
+	  }
+	p=val_reverse(p);
+      }
+    }
+     
     
     for (s=relation_head(utt_relation(u,"Segment")); s; s=item_next(s))
     {
@@ -363,6 +405,14 @@ cst_utterance *cart_duration(cst_utterance *u)
 	else
 	    local_dur_stretch = dur_stretch;
 
+	//FAB://Aggiunto controlli per zscore > 3
+	if ((zdur > 3) || (zdur < -3))
+	{
+	  // cwarn << "Duration tree extreme for " << s->name() << 
+	  //" " << pdur << endl;
+	    zdur = ((zdur < 0) ? -3 : 3);
+	}
+
 	dur = local_dur_stretch * ((zdur*dur_stat->stddev)+dur_stat->mean);
 	DPRINTF(0,("phone %s accent %s stress %s pdur %f stretch %f mean %f std %f dur %f\n",
 		   item_name(s),
@@ -370,9 +420,27 @@ cst_utterance *cart_duration(cst_utterance *u)
 		   ffeature_string(s,"R:SylStructure.parent.stress"),
 		   zdur, local_dur_stretch, dur_stat->mean,
 		   dur_stat->stddev, dur));
+	//FAB://Aggiunto controlli per zscore AB> 3
+	if (dur < 0.010)
+	  dur = 0.010;  // just in case it goes wrong
+	
 	end += dur;
 	item_set_float(s,"end",end);
+	if (lab_file){
+	  fprintf(fout,"%s %f\n",item_name(s),end);
+	  //printf("%s %f\n",item_name(s),end); 
+	  if(tags && p!=NULL){	    
+	    if (item_equal(s,item_last_daughter(item_last_daughter(item_parent(item_parent(item_as(s,"SylStructure")))))) && 
+		 (ffeature_int(s,"R:SylStructure.parent.parent.word_number") == val_int(val_car(p)))) {
+	      fprintf(fout,"<tmptag>\n");
+	      //printf("<tmptag>\n");
+	      p=val_cdr(p);
+	    }
+	  }
+	}
     }
+    if (lab_file)
+      fclose(fout);
     return u;
 }
 

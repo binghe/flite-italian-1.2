@@ -37,6 +37,12 @@
 /*  Lexicon related functions                                            */
 /*                                                                       */
 /*************************************************************************/
+
+/*************************************************************************/
+/*      Modified by:  Fabio Tesser <tesser@pd.istc.cnr.it>               */
+/*             Date:  October 2004                                       */
+/*************************************************************************/
+
 #ifndef _CST_LEXICON_H__
 #define _CST_LEXICON_H__
 
@@ -75,6 +81,8 @@ int lex_delete_entry(cst_lexicon *l, const char *word, const char *pos);
 
 cst_val *lex_lookup(const cst_lexicon *l, const char *word, const char *pos);
 int in_lex(const cst_lexicon *l, const char *word, const char *pos);
+
+cst_val *lex_lookup_return_pos(const cst_lexicon *l, const char *word, const char *pos, int *return_pos);
 
 CST_VAL_USER_TYPE_DCLS(lexicon,cst_lexicon)
 

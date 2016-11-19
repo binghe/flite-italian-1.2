@@ -38,6 +38,11 @@
 /*                                                                       */
 /*************************************************************************/
 
+/*************************************************************************/
+/*      Modified by:  Fabio Tesser <tesser@pd.istc.cnr.it>               */
+/*             Date:  October 2004                                       */
+/*************************************************************************/
+
 #include <stdio.h>
 #include <string.h>
 #include "cst_tokenstream.h"
@@ -95,15 +100,17 @@ cst_wave *flite_text_to_wave(const char *text, cst_voice *voice)
     return w;
 }
 
+
+/* OLD utt_break 
 static int utt_break(cst_tokenstream *ts,const char *token,cst_relation *tokens)
 {
-    /* This is English (and some other latin based languages) */
-    /* so it shouldn't be here                                */
+// This is English (and some other latin based languages) 
+// so it shouldn't be here                                
     const char *postpunct = item_feat_string(relation_tail(tokens), "punc");
     const char *ltoken = item_name(relation_tail(tokens));
 
     if (strchr(ts->whitespace,'\n') != cst_strrchr(ts->whitespace,'\n'))
-	 /* contains two new lines */
+    // contains two new lines //
 	 return TRUE;
     else if (strchr(postpunct,':') ||
 	     strchr(postpunct,'?') ||
@@ -114,9 +121,9 @@ static int utt_break(cst_tokenstream *ts,const char *token,cst_relation *tokens)
 	     strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ",token[0]))
 	return TRUE;
     else if (strchr(postpunct,'.') &&
-	     /* next word starts with a capital */
+	     // next word starts with a capital 
 	     strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ",token[0]) &&
-	     /* last word isn't an abbreviation */
+	     // last word isn't an abbreviation 
 	     !(strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ",ltoken[strlen(ltoken)-1])||
 	       ((strlen(ltoken) < 4) &&
 		strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ",ltoken[0]))))
@@ -124,6 +131,22 @@ static int utt_break(cst_tokenstream *ts,const char *token,cst_relation *tokens)
     else
 	return FALSE;
 }
+*/
+
+static int utt_break(cst_tokenstream *ts,const char *token,cst_relation *tokens)
+{
+  //Another utt_break Modified by Fabio Tesser 
+  const char *postpunct = item_feat_string(relation_tail(tokens), "punc");
+  const char *ltoken = item_name(relation_tail(tokens));
+  if (strchr(ts->whitespace,'\n') != cst_strrchr(ts->whitespace,'\n'))
+    // contains two new lines 
+    return TRUE;
+  else 
+    return FALSE;
+}
+
+
+
 
 float flite_file_to_speech(const char *filename, 
 			   cst_voice *voice,
@@ -172,34 +195,43 @@ float flite_file_to_speech(const char *filename,
     num_tokens = 0;
     utt = new_utterance();
     tokrel = utt_relation_create(utt, "Token");
-    while (!ts_eof(ts))
-    {
+    
+    int p= ts_eof(ts); //FABIO EOF senza a capo. (originale: non c'era questa linea)
+    while (!p) //modifica con !p per  FABIO EOF senza a capo. (originale: (!ts_eof(ts)) 
+      {	
+	p=ts_eof(ts);// FABIO EOF senza a capo.(originale: non c'era questa linea)
+	
 	token = ts_get(ts);
-	if ((strlen(token) == 0) ||
+	if ((num_tokens > 0) && 
+	    ((strlen(token) == 0) ||
 	    (num_tokens > 500) ||  /* need an upper bound */
-	    (relation_head(tokrel) && utt_break(ts,token,tokrel)))
-	{
+	    (relation_head(tokrel) && utt_break(ts,token,tokrel))))
+	  {
 	    /* An end of utt */
 	    d = flite_tokens_to_speech(utt,voice,outtype);
 	    utt = NULL;
 	    if (d < 0)
-		goto out;
+	      goto out;
 	    durs += d;
-
+	    
 	    utt = new_utterance();
 	    tokrel = utt_relation_create(utt, "Token");
 	    num_tokens = 0;
-	}
-	num_tokens++;
-
-	t = relation_append(tokrel, NULL);
-	item_set_string(t,"name",token);
-	item_set_string(t,"whitespace",ts->whitespace);
-	item_set_string(t,"prepunctuation",ts->prepunctuation);
-	item_set_string(t,"punc",ts->postpunctuation);
-	item_set_int(t,"file_pos",ts->file_pos);
-	item_set_int(t,"line_number",ts->line_number);
-    }
+	  }
+	//fabio
+	//printf("tk >%s<\n",token);
+	if (strlen(token) != 0) 
+	  {	
+	    num_tokens++;
+	    t = relation_append(tokrel, NULL);
+	    item_set_string(t,"name",token);
+	    item_set_string(t,"whitespace",ts->whitespace);
+	    item_set_string(t,"prepunctuation",ts->prepunctuation);
+	    item_set_string(t,"punc",ts->postpunctuation);
+	    item_set_int(t,"file_pos",ts->file_pos);
+	    item_set_int(t,"line_number",ts->line_number);
+	  }
+      }
 
 out:
     delete_utterance(utt);

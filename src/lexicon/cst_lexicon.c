@@ -38,6 +38,11 @@
 /*                                                                       */
 /*************************************************************************/
 
+/*************************************************************************/
+/*      Modified by:  Fabio Tesser <tesser@pd.istc.cnr.it>               */
+/*             Date:  October 2004                                       */
+/*************************************************************************/
+
 #include <stdio.h>
 #include <string.h>
 #include "cst_features.h"
@@ -295,6 +300,53 @@ static cst_val *lex_lookup_addenda(const char *wp,const cst_lexicon *l,
     
     return NULL;
 }
+
+cst_val *lex_lookup_return_pos(const cst_lexicon *l, const char *word, const char *pos, int *return_pos)
+{
+    int index,p;
+    char *wp, *buf;
+    cst_val *phones = 0;
+    int found = FALSE;
+
+    wp = cst_alloc(char,strlen(word)+2);
+    buf = cst_alloc(char,3);
+    sprintf(wp,"%c%s",(pos ? pos[0] : '0'),word);
+    
+    if (l->addenda)
+      phones = lex_lookup_addenda(wp,l,&found);
+    
+    if (!found)
+      {
+	index = lex_lookup_bsearch(l->entry_index,0,l->num_entries,wp);
+	
+	if (index >= 0)
+	  {
+	    for (p=l->entry_index[index].phone_index; l->phones[p]; p++)
+	      phones = cons_val(string_val(l->phone_table[l->phones[p]]), phones);
+	    phones = val_reverse(phones);
+	    if (!pos) 
+	      {
+		//aggiungi in testa il pos se non lo ho!
+		*return_pos = TRUE;
+		sprintf(buf,"%c",l->entry_index[index].word_pos[0]);
+		phones = cons_val(string_val(buf), phones);	      
+	      }
+	    //val_print(stdout,phones);
+	    //printf("\n");
+	  } 
+	else if (l->lts_rule_set)
+	  phones = lts_apply(word,
+			     "",  /* more features if we had them */
+			     l->lts_rule_set);
+	else if (l->lts_function)
+	  phones = (l->lts_function)(l,word,"");
+      }
+    
+    cst_free(wp);
+    cst_free(buf);
+    return phones;
+}
+
 
 static int lex_lookup_bsearch(const lexicon_entry *entries,
 			      int start, int end,
