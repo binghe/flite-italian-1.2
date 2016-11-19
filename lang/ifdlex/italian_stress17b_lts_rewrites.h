@@ -1,0 +1,2 @@
+extern const cst_lts_rewrites italian_stress17b_lts_rewrites;
+

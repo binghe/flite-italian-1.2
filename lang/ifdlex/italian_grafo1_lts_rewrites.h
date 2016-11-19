@@ -1,0 +1,2 @@
+extern const cst_lts_rewrites italian_grafo1_lts_rewrites;
+
