@@ -38,7 +38,7 @@ TOP=..
 DIRNAME=main
 BUILD_DIRS = 
 ALL_DIRS= 
-SRCS = flite_main.c flite_time_main.c t2p_main.c
+SRCS = flite_main.c flite_time_main.c t2p_main.c g2p.c it_flite_main.c
 OBJS = $(SRCS:.c=.o)
 FILES = Makefile $(SRCS)
 LOCAL_INCLUDES = -I$(TOP)/lang/$(FL_VOX)
@@ -66,3 +66,9 @@ $(BINDIR)/flite_time$(EXEEXT): flite_time_main.o $(FLITELIBS) $(flite_time_LIBS_
 
 $(BINDIR)/t2p$(EXEEXT): t2p_main.o $(FLITELIBS) $(flite_LIBS_deps)
 	$(CC) $(CFLAGS) -o $@ t2p_main.o $(flite_LIBS_flags) $(LDFLAGS)
+
+$(BINDIR)/it_flite$(EXEEXT): it_flite_main.o $(FLITELIBS) $(flite_LIBS_deps)
+	$(CC) $(CFLAGS) -o $@ it_flite_main.o $(flite_LIBS_flags) $(LDFLAGS)
+
+$(BINDIR)/g2p$(EXEEXT): g2p.o $(FLITELIBS) $(flite_LIBS_deps)
+	$(CC) $(CFLAGS) -o $@ g2p.o $(flite_LIBS_flags) $(LDFLAGS)

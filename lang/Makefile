@@ -36,7 +36,8 @@
 ###########################################################################
 TOP=..
 DIRNAME=lang
-BUILD_DIRS = usenglish cmulex cmu_us_kal cmu_time_awb cmu_us_kal16
+BUILD_DIRS = usenglish cmulex cmu_us_kal cmu_time_awb cmu_us_kal16 \
+	ifdlex italian irstifd_ita_lp irstifd_ita_pc
 ALL_DIRS= $(BUILD_DIRS)
 FILES = Makefile $(SCM) $(SRCS)
 
