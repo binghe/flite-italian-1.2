@@ -239,6 +239,26 @@ out:
     return durs;
 }
 
+float flite_text_to_phones(const char *text,
+			   cst_voice *voice)
+{
+    cst_utterance *u;
+    cst_item *s;
+
+    u = flite_synth_text(text,voice);
+    if (u == NULL)
+	return -1;
+    else {
+	for (s=relation_head(utt_relation(u,"Segment")); s; s=item_next(s))
+	    if ((strcmp(item_name(s),"ng") == 0) || 
+		(strcmp(item_name(s),"nf") == 0))
+		printf("n ");
+	    else
+		printf("%s ",item_name(s));
+	printf("\n");
+    }
+}
+
 float flite_text_to_speech(const char *text,
 			   cst_voice *voice,
 			   const char *outtype)
