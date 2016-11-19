@@ -36,7 +36,7 @@
 ###########################################################################
 
 TOP=../..
-DIRNAME=ifdlex
+DIRNAME=lang/ifdlex
 BUILD_DIRS = 
 ALL_DIRS= 
 H = ifdlex.h \
@@ -127,6 +127,8 @@ SRCS =  ifd_lex.c\
     italian_grafo9_lts_rewrites.c \
     italian_grafo10_lts_rewrites.c 
 
+LEXDIM = full
+
 ifeq ($(LEXDIM),full)
 SRCS += ifd_lex_phone-full.c ifd_lex_entry-full.c
 endif
@@ -141,6 +143,6 @@ FILES = Makefile $(SCM) $(SRCS) $(H)
 LIBNAME = flite_ifdlex
 LOCAL_INCLUDES = 
 
-ALL =
+ALL = .build_lib
 
 include $(TOP)/config/common_make_rules

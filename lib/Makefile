@@ -40,7 +40,8 @@ BUILD_DIRS =
 ALL_DIRS=
 FILES = Makefile
 LIBNAMES = flite flite_cmulex flite_usenglish \
-           flite_cmu_us_kal flite_cmu_us_kal16 flite_cmu_time_awb
+           flite_cmu_us_kal flite_cmu_us_kal16 flite_cmu_time_awb \
+           flite_italian flite_ifdlex irstifd_ita_lp irstifd_ita_pc
 STATICLIBS= $(LIBNAMES:%=lib%.a)
 SHAREDARLIBS= $(LIBNAMES:%=lib%.shared.a)
 SHAREDLIBS = $(LIBNAMES:%=lib%.so)

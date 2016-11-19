@@ -45,6 +45,8 @@ H = italian.h it_text.h it_phrasing_cart.h \
     sillabe1_lts_rewrites.h sillabe2_lts_rewrites.h \
     it_lexical_insertion.h diphones_map.h \
 
+PROSODYTYPE = f0_cart
+
 ifeq ($(PROSODYTYPE),f0_cart)
 H += it_durz_ds_cart.h it_int_accent_ds_cart.h \
      it_f0z_start_cart.h it_f0z_mid_cart.h it_f0z_end_cart.h 
@@ -77,6 +79,6 @@ FILES = Makefile $(SCM) $(SRCS) $(H)
 LIBNAME = flite_italian
 LOCAL_INCLUDES = 
 
-ALL = 
+ALL = .build_lib
 
 include $(TOP)/config/common_make_rules

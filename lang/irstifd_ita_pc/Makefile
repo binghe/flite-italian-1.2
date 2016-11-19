@@ -38,7 +38,7 @@
 TOP=../..
 DIRNAME=lang/irstifd_ita_pc
 VOICENAME=irstifd_ita_pc
-#VOICETYPE could be: diphone_lpc or diphone_mbrola or clunits or ldom #
+VOICETYPE=diphone_lpc
 
 BUILD_DIRS =
 ALL_DIRS =
@@ -58,6 +58,6 @@ FILES = Makefile $(SCM) $(SRCS) $(H)
 LIBNAME = $(VOICENAME)
 LOCAL_INCLUDES = -I$(TOP)/lang/italian -I$(TOP)/lang/ifdlex $(VOXDEFS)
 
-ALL =
+ALL = .build_lib
 
-include $(FLITEDIR)/config/common_make_rules
+include $(TOP)/config/common_make_rules

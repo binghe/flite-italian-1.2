@@ -46,7 +46,8 @@ LOCAL_CLEAN = $(BINDIR)/flite$(EXEEXT) $(BINDIR)/flite_time$(EXEEXT) \
               $(BINDIR)/t2p$(EXEEXT)
 
 ALL = $(BINDIR)/flite$(EXEEXT) $(BINDIR)/flite_time$(EXEEXT) \
-      $(BINDIR)/t2p$(EXEEXT)
+      $(BINDIR)/t2p$(EXEEXT) \
+      $(BINDIR)/it_flite$(EXEEXT) $(BINDIR)/g2p$(EXEEXT)
 
 flite_LIBS = flite_$(FL_VOX) flite_$(FL_LANG) flite_$(FL_LEX) 
 flite_LIBS_flags = -L$(LIBDIR) $(flite_LIBS:%=-l%)
@@ -55,6 +56,10 @@ flite_LIBS_deps = $(flite_LIBS:%=$(LIBDIR)/lib%.a)
 flite_time_LIBS = flite_cmu_time_awb flite_$(FL_LANG) flite_$(FL_LEX)
 flite_time_LIBS_flags = -L$(LIBDIR) $(flite_time_LIBS:%=-l%)
 flite_time_LIBS_deps = $(flite_time_LIBS:%=$(LIBDIR)/lib%.a)
+
+it_flite_LIBS = irstifd_ita_lp irstifd_ita_pc flite_italian flite_ifdlex
+it_flite_LIBS_flags = -L$(LIBDIR) $(it_flite_LIBS:%=-l%)
+it_flite_LIBS_deps = $(it_flite_LIBS:%=$(LIBDIR)/lib%.a)
 
 include $(TOP)/config/common_make_rules
 
@@ -67,8 +72,8 @@ $(BINDIR)/flite_time$(EXEEXT): flite_time_main.o $(FLITELIBS) $(flite_time_LIBS_
 $(BINDIR)/t2p$(EXEEXT): t2p_main.o $(FLITELIBS) $(flite_LIBS_deps)
 	$(CC) $(CFLAGS) -o $@ t2p_main.o $(flite_LIBS_flags) $(LDFLAGS)
 
-$(BINDIR)/it_flite$(EXEEXT): it_flite_main.o $(FLITELIBS) $(flite_LIBS_deps)
-	$(CC) $(CFLAGS) -o $@ it_flite_main.o $(flite_LIBS_flags) $(LDFLAGS)
+$(BINDIR)/it_flite$(EXEEXT): it_flite_main.o $(FLITELIBS) $(it_flite_LIBS_deps)
+	$(CC) $(CFLAGS) -o $@ it_flite_main.o $(it_flite_LIBS_flags) $(LDFLAGS)
 
-$(BINDIR)/g2p$(EXEEXT): g2p.o $(FLITELIBS) $(flite_LIBS_deps)
-	$(CC) $(CFLAGS) -o $@ g2p.o $(flite_LIBS_flags) $(LDFLAGS)
+$(BINDIR)/g2p$(EXEEXT): g2p.o $(FLITELIBS) $(it_flite_LIBS_deps)
+	$(CC) $(CFLAGS) -o $@ g2p.o $(it_flite_LIBS_flags) $(LDFLAGS)
